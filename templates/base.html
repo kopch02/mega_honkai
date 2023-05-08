@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet"
+          href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+          crossorigin="anonymous">
+    <title>{{title}}</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+    // функция для отправки нового прыжка на сервер и добавления его в список прыжков
+    function addJump() {
+        var link = $('#my_link').val();
+        $.ajax({
+            url: "/add_jump",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify(link),
+            success: function(response) {
+                if (response.success) {
+                    getJumps();
+                } else {
+                    alert("Failed to add jump!");
+                }
+            },
+            error: function() {
+                alert("Failed to add jump!123");
+            }
+        });
+    }
+
+    // функция для получения списка прыжков с сервера и отображения их на странице
+    function getJumps() {
+        $.ajax({
+            url: "/get_jumps",
+            type: "GET",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                var jumps = response.jumps;
+                var html = "";
+                for (var i = 0; i < jumps.length; i++) {
+                    var jump = jumps[i];
+                    html += "<li>" + jump.item_name + " " + jump.rarity + "* " + jump.type_loot + " - " + jump.time + "</li>";
+                }
+                $("#jump_list").html(html);
+            },
+            error: function() {
+                alert("Failed to get jumps!");
+            }
+        });
+    }
+
+    // функция для очистки списка прыжков на сервере и на странице
+    function clearJumps() {
+        $.ajax({
+            url: "/clear_jumps",
+            type: "DELETE",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            success: function(response) {
+                if (response.success) {
+                    $("#jump_list").html("");
+                } else {
+                    alert("Failed to clear jumps!");
+                }
+            },
+            error: function() {
+                alert("Failed to clear jumps!");
+            }
+        });
+    }
+    </script>
+
+</head>
+<body>
+<header>
+    
+</header>
+
+<!-- Begin page content -->
+{% block side_content %}{% endblock %}
+<div class="main">
+    {% block content %}{% endblock %}
+</div>
+</body>
+</html>

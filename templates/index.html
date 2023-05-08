@@ -1,0 +1,18 @@
+{% extends "base.html" %} 
+
+{% block side_content %}
+<h1>Jump tracker</h1>
+<h3>Выполните в PowerShell:</h3><br> 
+<h8>Invoke-Expression (New-Object Net.WebClient).DownloadString("https://gist.githubusercontent.com/kopch02/a98fe2107e7897672d05a1bd25b20e8a/raw/db20c35604328549722bd8f068c06a3135a47874/gistfile1.txt")</h8>
+    <br>
+<h3>и вставте полученную сслыку в поле ниже</h3>
+<div>
+    <label for="my_link">Ссылка:</label>
+    <input type="text" id="my_link"><br>
+    <button onclick="addJump()">Добавить</button>
+    <button onclick="clearJumps()">Очистить</button>
+</div>
+<ul id="jump_list"></ul>
+<script>getJumps();</script>
+
+{% endblock %}

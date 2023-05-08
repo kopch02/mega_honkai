@@ -1,0 +1,19 @@
+{% extends "base.html" %} 
+
+{% block side_content %}
+    <h1>Импорт истории прыжков</h1>
+    <a class="btn btn-success" href="/">Главная</a>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <p>
+            выполните: <br>
+            Invoke-Expression (New-Object Net.WebClient).DownloadString("https://gist.githubusercontent.com/kopch02/a98fe2107e7897672d05a1bd25b20e8a/raw/db20c35604328549722bd8f068c06a3135a47874/gistfile1.txt")<br>
+            в PowerShell чтобы скопировать ссылку
+        </p>
+        <p>
+            {{form.url_history.label}}<br>
+            {{form.url_history}}<br>
+        </p>
+        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
+    </form>
+{% endblock %}

