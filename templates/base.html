@@ -11,6 +11,55 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script>
+        try {
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+    } catch (e) {
+        var storage = {};
+        Object.defineProperty(storage, 'setItem', {
+            value: function(id, val) {
+                return this[id] = String(val);
+            },
+            writable: true,
+            configurable: true,
+            enumerable: false
+        });
+        Object.defineProperty(storage, 'getItem', {
+            value: function(id) {
+                return this.hasOwnProperty(id) ? this[id] : undefined;
+            },
+            writable: true,
+            configurable: true,
+            enumerable: false
+        });
+        Object.defineProperty(storage, 'removeItem', {
+            value: function(id) {
+                return delete this[id];
+            },
+            writable: true,
+            configurable: true,
+            enumerable: false
+        });
+        Object.defineProperty(storage, 'clear', {
+            value: function() {
+                var thisStorage = this;
+                Object.keys(thisStorage).forEach(function(key) {
+                    delete thisStorage[key];
+                });
+            },
+            writable: true,
+            configurable: true,
+            enumerable: false
+        });
+        Object.defineProperty(storage, 'length', {
+            get: function() {
+                return Object.keys(this).length;
+            },
+            configurable: true,
+            enumerable: false
+        });
+        localStorage = storage;
+    }
     // функция для отправки нового прыжка на сервер и добавления его в список прыжков
     function addJump() {
         var link = $('#my_link').val();

@@ -1,0 +1,36 @@
+.table {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    width: 100%; /* добавлено */
+  }
+  
+  .table-row {
+    width: calc(33.33% - 10px); /* изменено */
+    margin-bottom: 20px;
+  }
+  
+  .table-cell {
+    background: #fff;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    margin-right: 20px; /* добавлено */
+  }
+  
+  .table-cell:last-child {
+    margin-right: 0; /* добавлено */
+  }
+  
+  table {
+    margin-top: 10px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  td {
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    text-align: left;
+  }
+  

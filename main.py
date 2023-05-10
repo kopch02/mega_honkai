@@ -6,16 +6,16 @@ from forms.jump_history import Jump_History_Form
 import asyncio
 from honkaistarrail import starrail
 
+class Myclass():
+    pass
 
-async def get_jump_history_link(link):
-    async with starrail.Jump(link = link,banner = 1,lang = "ru") as hist:
-        async for key in hist.get_history():
-            for info in key:
-                print(f'[{info.type}] Name: {info.name} ({info.rank}*) - {info.time.strftime("%d.%m.%Y %H:%M:%S")}')
+JUMPS = ['jumps_event','jumps_weapon','jumps_standart']
+name_jumps_ru = ["Ивентовый баннер","Оружейный баннер","Стандартный баннер"]
 
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'my_secret_key'
+app.config['MAX_COOKIE_SIZE'] = 1024 * 5
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -31,11 +31,22 @@ def main():
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html')
+    param = {}
+    tables = []
+    for i, jump_name in enumerate(JUMPS):
+        jumps = session.get(jump_name, [])
+        table = Myclass()
+        table.name = name_jumps_ru[i]
+        table.count = len(jumps)
+        table.garant_5 = 100
+        table.garant_4 = 100
+        tables.append(table)
+    param['tables'] = tables
+    return render_template('index.html', **param)
 
 
-async def get_jump_history(link, jumps):
-    async with starrail.Jump(link = link,banner = 1,lang = "ru") as hist:
+async def get_jump_history(link, jumps, banner_num):
+    async with starrail.Jump(link = link,banner = banner_num,lang = "ru") as hist:
         async for key in hist.get_history():
             for item in key:
                 pass
@@ -52,11 +63,11 @@ def import_jump():
     form = Jump_History_Form()
     if form.validate_on_submit():
         link = form.url_history.data
-        db_sess = db_session.create_session()
-        asyncio.run(get_jump_history(link,db_sess))
-        
-        db_sess.commit()
-        return redirect('/history')
+        for i, jumps_name in enumerate(JUMPS):
+            jumps = session.get(jumps_name, [])
+            asyncio.run(get_jump_history(link,jumps, 2))
+            session[jumps_name] = jumps
+        return redirect('/')
     return render_template('import.html', form = form)
 
 
@@ -70,9 +81,10 @@ def history():
 @app.route('/add_jump', methods=['POST'])
 def add_jump():
     link = request.get_json()
-    jumps = session.get('jumps', [])
-    asyncio.run(get_jump_history(link,jumps))
-    session['jumps'] = jumps
+    for i, jumps in enumerate(JUMPS):
+        jumps = session.get(jumps, [])
+        asyncio.run(get_jump_history(link,jumps, i))
+        session[jumps] = jumps
     return jsonify(success=True)
 
 @app.route('/get_jumps', methods=['GET'])
@@ -81,7 +93,9 @@ def get_jumps():
 
 @app.route('/clear_jumps', methods=['DELETE'])
 def clear_jumps():
-    session.pop('jumps', None)
+    for jumps in JUMPS:
+        session.pop(jumps, None)
+    #session.pop("jumps", None)
     return jsonify(success=True)
 
 if __name__ == '__main__':
