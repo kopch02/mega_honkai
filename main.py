@@ -65,7 +65,7 @@ def import_jump():
         link = form.url_history.data
         for i, jumps_name in enumerate(JUMPS):
             jumps = session.get(jumps_name, [])
-            asyncio.run(get_jump_history(link,jumps, 2))
+            asyncio.run(get_jump_history(link,jumps, i))
             session[jumps_name] = jumps
         return redirect('/')
     return render_template('import.html', form = form)
