@@ -10,9 +10,8 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True,autoincrement=True)
-
-    email = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    email = sqlalchemy.Column(sqlalchemy.String)
 
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
@@ -23,4 +22,4 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
         return check_password_hash(self.hashed_password, password)
     
     def __repr__(self) -> str:
-        return f"<User> {self.id}"
+        return f"<User> {self.id}, {self.name}"
