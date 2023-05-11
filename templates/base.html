@@ -9,78 +9,19 @@
           crossorigin="anonymous">
     <title>{{title}}</title>
 
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-    
-    // функция для отправки нового прыжка на сервер и добавления его в список прыжков
-    function addJump() {
-        var link = $('#my_link').val();
-        $.ajax({
-            url: "/add_jump",
-            type: "POST",
-            dataType: "json",
-            contentType: "application/json; charset=utf-8",
-            data: JSON.stringify(link),
-            success: function(response) {
-                if (response.success) {
-                    getJumps();
-                } else {
-                    alert("Failed to add jump!");
-                }
-            },
-            error: function() {
-                alert("Failed to add jump!123");
-            }
-        });
-    }
-
-    // функция для получения списка прыжков с сервера и отображения их на странице
-    function getJumps() {
-        $.ajax({
-            url: "/get_jumps",
-            type: "GET",
-            dataType: "json",
-            contentType: "application/json; charset=utf-8",
-            success: function(response) {
-                var jumps = response.jumps;
-                var html = "";
-                for (var i = 0; i < jumps.length; i++) {
-                    var jump = jumps[i];
-                    html += "<li>" + jump.item_name + " " + jump.rarity + "* " + jump.type_loot + " - " + jump.time + "</li>";
-                }
-                $("#jump_list").html(html);
-            },
-            error: function() {
-                alert("Failed to get jumps!");
-            }
-        });
-    }
-
-    // функция для очистки списка прыжков на сервере и на странице
-    function clearJumps() {
-        $.ajax({
-            url: "/clear_jumps",
-            type: "DELETE",
-            dataType: "json",
-            contentType: "application/json; charset=utf-8",
-            success: function(response) {
-                if (response.success) {
-                    $("#jump_list").html("");
-                } else {
-                    alert("Failed to clear jumps!");
-                }
-            },
-            error: function() {
-                alert("Failed to clear jumps!");
-            }
-        });
-    }
-    </script>
-
+   
 </head>
 <body>
 <header>
-    
+    {% if current_user.is_authenticated %}
+    <nav class="navbar navbar-light bg-light">
+        <p> 
+            <a class="navbar-brand" href="/">Главная</a>
+            <a class="navbar-brand" href="/import_jump">Импорт</a>
+        </p>
+            <a class="navbar-brand" href="/logout">{{ current_user.name }} {{ current_user.surname }}</a>
+        </nav>
+        {% endif %}
 </header>
 
 <!-- Begin page content -->
