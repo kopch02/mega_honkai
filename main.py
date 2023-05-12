@@ -1,7 +1,7 @@
 from flask import Flask, url_for, render_template, redirect, send_from_directory, abort, session, request, jsonify, make_response
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data import db_session
-from sqlalchemy import func
+from sqlalchemy import func, select
 from data.users import User
 from data.items import Item
 from data.jumps_weapon import Jump_weapon
@@ -34,7 +34,7 @@ def load_user(user_id):
 
 def main():
     db_session.global_init()
-    app.run()
+    app.run(host='0.0.0.0')
 
 @app.route('/logout')
 @login_required
@@ -70,8 +70,11 @@ async def get_jump_history(link, db_table, banner_num):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == current_user.id).first()
     count_all_jump = 0
+    garant5 = [i for i in user.count_garant_5]
+    garant4 = [i for i in user.count_garant_4]
     temp = [i for i in user.count_all_jumps]
-    num_jump = db_sess.query(func.max(jump_tables[banner_num - 1].num_jump)).filter(jump_tables[banner_num - 1].user_id == current_user.id).scalar() or 0
+    num_jump = db_sess.query(func.max(jump_tables[banner_num - 1].num_jump)).\
+        filter(jump_tables[banner_num - 1].user_id == current_user.id).scalar() or 0
     async with starrail.Jump(link = link,banner = banner_num,lang = "ru") as hist:
         async for key in hist.get_history():
             for item in key:
@@ -91,37 +94,31 @@ async def get_jump_history(link, db_table, banner_num):
             count_all_jump += len(key)
     temp[banner_num - 1] = user.count_all_jumps[banner_num - 1] + count_all_jump
     user.count_all_jumps = temp
+    garant5[banner_num - 1],garant4[banner_num - 1] = count_garant(jump_tables[banner_num - 1], db_sess)
+    user.count_garant_5 = garant5
+    user.count_garant_4 = garant4
     db_sess.commit()
     
 
 
-def count_garant():
-    db_sess = db_session.create_session()
-    user = db_sess.query(User).get(current_user.id)
-    
-    last_rank_4_jump = None
-    last_rank_5_jump = None
-    
-    all_jumps = db_sess.query(Jump_event).filter(Jump_event.user_id==current_user.id).order_by(Jump_event.item_time.asc()).all()
-    for aj in all_jumps:
-        aj_item = db_sess.query(Item).get(aj.item_id)
-        if aj_item.rank == 4:
-            last_rank_4_jump = aj.id
-        elif aj_item.rank == 5:
-            last_rank_5_jump = aj.id
-    
-    if last_rank_5_jump:
-        rank_5_delta = len(all_jumps) - (db_sess.query(Jump_event).filter(Jump_event.id <= last_rank_5_jump).count())
-        user.last_rank_5_jump = last_rank_5_jump
-    else:
-        rank_5_delta = None
-        
-    db_sess.commit()
-    
-    response = {'rank_5_delta': rank_5_delta}
-    return jsonify(response)
-    
+def count_garant(banner,db_sess):
+    num_jump = db_sess.query(func.max(banner.num_jump)).filter(banner.user_id == current_user.id).scalar() or 0
+    last_5 = db_sess.query(banner.num_jump).\
+        join(Item, banner.item_id == Item.id).\
+        filter(Item.rank == 5).\
+        filter(banner.user_id == current_user.id).\
+        order_by(banner.id.desc()).first()[0]
+    last_4 = db_sess.query(banner.num_jump).\
+        join(Item, banner.item_id == Item.id).\
+        filter(Item.rank == 4).\
+        filter(banner.user_id == current_user.id).first()[0]
+        #order_by(banner.id.desc()).first()[0]
+    return last_5 - 1, last_4 - 1
 
+'''
+select num_jump from jumps_event, items
+where items.rank = 5 and jumps_event.item_id = items.id
+'''
 
 @app.route('/import_jump', methods=['GET', 'POST'])
 @login_required
