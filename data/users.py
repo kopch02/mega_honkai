@@ -13,6 +13,11 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String)
 
+    count_all_jumps = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.Integer), default=[])
+    count_garant_5 = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.Integer), default=[])
+    count_garant_4 = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.Integer), default=[])
+
+
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
 
     def set_password(self, password):

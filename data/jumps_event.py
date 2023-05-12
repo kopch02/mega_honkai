@@ -15,6 +15,8 @@ class Jump_event(SqlAlchemyBase, UserMixin, SerializerMixin):
                                     sqlalchemy.ForeignKey("items.id"))
     item_time = sqlalchemy.Column(sqlalchemy.DateTime)
 
+    num_jump = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+
     item = orm.relationship('Item')
     user = orm.relationship('User')
 

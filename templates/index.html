@@ -2,7 +2,7 @@
 
 {% block side_content %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css')}}" type="text/css"/>
-<h1>Jump tracker</h1>
+<h1>Счётчик прыжков</h1>
 <div class="table">
     {%for table in tables%}
     <div class="table-row">
@@ -11,15 +11,15 @@
         <table>
           <tbody>
             <tr>
-              <td>Total Jumps:</td>
+              <td>Всего прыжков:</td>
               <td>{{table.count}}</td>
             </tr>
             <tr>
-              <td>Guarantee 5*:</td>
+              <td>Гарант 5*:</td>
               <td>{{table.garant_5}}</td>
             </tr>
             <tr>
-              <td>Guarantee 4*:</td>
+              <td>Гарант 4*:</td>
               <td>{{table.garant_4}}</td>
             </tr>
           </tbody>
@@ -29,5 +29,7 @@
     {%endfor%}
     
   </div>
+  <!--
   <a class="btn btn-success" onclick="clearJumps()">Очистить</a>
+  -->
 {% endblock %}

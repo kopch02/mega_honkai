@@ -15,8 +15,10 @@ class Jump_weapon(SqlAlchemyBase, UserMixin, SerializerMixin):
                                     sqlalchemy.ForeignKey("items.id"))
     item_time = sqlalchemy.Column(sqlalchemy.DateTime)
 
+    num_jump = sqlalchemy.Column(sqlalchemy.Integer, default=0)
+
     item = orm.relationship('Item')
     user = orm.relationship('User')
 
     def __repr__(self) -> str:
-        return f"<Jump> {self.id}, <user> {self.user.id}, <item> {self.item.id}"
+        return f"<Jump> {self.id}, <user> {self.user.id}, <item> {self.item.id}, num= {self.num_jump}"
