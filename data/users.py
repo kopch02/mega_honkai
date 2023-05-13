@@ -10,15 +10,15 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = 'users'
 
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True,autoincrement=True)
-    name = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    email = sqlalchemy.Column(sqlalchemy.String)
+    name = sqlalchemy.Column(sqlalchemy.String(40), nullable=True)
+    email = sqlalchemy.Column(sqlalchemy.String(100))
 
-    count_all_jumps = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.Integer), default=[])
-    count_garant_5 = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.Integer), default=[])
-    count_garant_4 = sqlalchemy.Column(sqlalchemy.ARRAY(sqlalchemy.Integer), default=[])
+    count_all_jumps = sqlalchemy.Column(sqlalchemy.String(30))
+    count_garant_5 = sqlalchemy.Column(sqlalchemy.String(30))
+    count_garant_4 = sqlalchemy.Column(sqlalchemy.String(30))
 
 
-    hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    hashed_password = sqlalchemy.Column(sqlalchemy.String(200), nullable=True)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)

@@ -9,9 +9,9 @@ class Item(SqlAlchemyBase, UserMixin, SerializerMixin):
     __tablename__ = "items"
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True)
 
-    name = sqlalchemy.Column(sqlalchemy.String)
+    name = sqlalchemy.Column(sqlalchemy.String(100))
     rank = sqlalchemy.Column(sqlalchemy.Integer)
-    type = sqlalchemy.Column(sqlalchemy.String)
+    type = sqlalchemy.Column(sqlalchemy.String(40))
 
     def __repr__(self) -> str:
         return f"<Item> {self.id}, {self.name}, {self.rank}, {self.type}"

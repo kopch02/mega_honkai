@@ -21,11 +21,11 @@ name_jumps_ru = ["Ивентовый баннер","Оружейный банн�
 jump_tables = [Jump_event,Jump_weapon,Jump_standart]
 
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'my_secret_key'
-app.config['MAX_COOKIE_SIZE'] = 1024 * 5
+application = Flask(__name__)
+application.config['SECRET_KEY'] = 'my_secret_key'
+application.config['MAX_COOKIE_SIZE'] = 1024 * 5
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.init_app(application)
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -34,30 +34,33 @@ def load_user(user_id):
 
 def main():
     db_session.global_init()
-    app.run(host='0.0.0.0')
+    application.run(host='0.0.0.0')
 
-@app.route('/logout')
+@application.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect("/")
 
 
-@app.route('/')
-@app.route('/index')
+@application.route('/')
+@application.route('/index')
 def index():
     if current_user.is_authenticated:
         db_sess = db_session.create_session()
         user = db_sess.query(User).filter(User.id == current_user.id).first()
         param = {}
         tables = []
+        all_jumps = user.count_all_jumps.split(';')
+        garant_5 = user.count_garant_5.split(';')
+        garant_4 = user.count_garant_4.split(';')
         for i, jump_name in enumerate(JUMPS):
 
             table = Myclass()
             table.name = name_jumps_ru[i]
-            table.count = user.count_all_jumps[i]
-            table.garant_5 = user.count_garant_5[i]
-            table.garant_4 = user.count_garant_4[i]
+            table.count = all_jumps[i]
+            table.garant_5 = garant_5[i]
+            table.garant_4 = garant_4[i]
             tables.append(table)
         param['tables'] = tables
         #count_garant()
@@ -70,9 +73,10 @@ async def get_jump_history(link, db_table, banner_num):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == current_user.id).first()
     count_all_jump = 0
-    garant5 = [i for i in user.count_garant_5]
-    garant4 = [i for i in user.count_garant_4]
-    temp = [i for i in user.count_all_jumps]
+    garant5 = list(map(int,[i for i in user.count_garant_5.split(';')]))
+    garant4 = list(map(int,[i for i in user.count_garant_4.split(';')]))
+    temp = list(map(int,[i for i in user.count_all_jumps.split(';')]))
+    count_all_jumps = list(map(int,[i for i in user.count_all_jumps.split(';')]))
     num_jump = db_sess.query(func.max(jump_tables[banner_num - 1].num_jump)).\
         filter(jump_tables[banner_num - 1].user_id == current_user.id).scalar() or 0
     async with starrail.Jump(link = link,banner = banner_num,lang = "ru") as hist:
@@ -92,13 +96,17 @@ async def get_jump_history(link, db_table, banner_num):
                                 num_jump = num_jump)
                 db_sess.add(jump)
             count_all_jump += len(key)
-    temp[banner_num - 1] = user.count_all_jumps[banner_num - 1] + count_all_jump
-    user.count_all_jumps = temp
-    garant5[banner_num - 1],garant4[banner_num - 1] = count_garant(jump_tables[banner_num - 1], db_sess)
-    user.count_garant_5 = garant5
-    user.count_garant_4 = garant4
+    temp[banner_num - 1] = count_all_jumps[banner_num - 1] + count_all_jump
+    user.count_all_jumps = conver_array_to_str(temp)
     db_sess.commit()
-    
+    garant5[banner_num - 1],garant4[banner_num - 1] = count_garant(jump_tables[banner_num - 1], db_sess)
+    user.count_garant_5 = conver_array_to_str(garant5)
+    user.count_garant_4 = conver_array_to_str(garant4)
+    db_sess.commit()
+
+
+def conver_array_to_str(arr):
+    return';'.join(list(map(str,arr)))
 
 
 def count_garant(banner,db_sess):
@@ -120,7 +128,7 @@ select num_jump from jumps_event, items
 where items.rank = 5 and jumps_event.item_id = items.id
 '''
 
-@app.route('/import_jump', methods=['GET', 'POST'])
+@application.route('/import_jump', methods=['GET', 'POST'])
 @login_required
 def import_jump():
     form = Jump_History_Form()
@@ -132,7 +140,7 @@ def import_jump():
     return render_template('import.html', form = form)
 
 
-@app.route('/history', methods=['GET', 'POST'])
+@application.route('/history', methods=['GET', 'POST'])
 @login_required
 def history():
     db_sess = db_session.create_session()
@@ -140,7 +148,7 @@ def history():
     return render_template('history.html', users = user)
 
 
-@app.route('/register', methods = ['GET','POST'])
+@application.route('/register', methods = ['GET','POST'])
 def register():
     form = RegisterForm()
     if form.validate_on_submit():
@@ -163,9 +171,9 @@ def register():
         new_user = User()
         new_user.name = form.name.data 
         new_user.email = form.email.data
-        new_user.count_all_jumps = [0,0,0]
-        new_user.count_garant_5 = [0,0,0]
-        new_user.count_garant_4 = [0,0,0]
+        new_user.count_all_jumps = '0;0;0'
+        new_user.count_garant_5 = '0;0;0'
+        new_user.count_garant_4 = '0;0;0'
         if passworld != None:
             new_user.set_password(passworld)
         db_sess.add(new_user)
@@ -174,7 +182,7 @@ def register():
     return render_template('register.html', form = form)
 
 
-@app.route('/login', methods=["GET","POST"])
+@application.route('/login', methods=["GET","POST"])
 def login():
     form = LoginForm()
     if form.validate_on_submit():
