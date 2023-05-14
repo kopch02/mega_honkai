@@ -26,6 +26,7 @@ application.config['SECRET_KEY'] = 'my_secret_key'
 application.config['MAX_COOKIE_SIZE'] = 1024 * 5
 login_manager = LoginManager()
 login_manager.init_app(application)
+db_session.global_init()
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -33,7 +34,6 @@ def load_user(user_id):
     return db_sess.query(User).get(user_id)
 
 def main():
-    db_session.global_init()
     application.run(host='0.0.0.0')
 
 @application.route('/logout')
