@@ -1,17 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Подсчёт прыжков honkai star rail</h1>
-<form action="" method="post" novalidate>
-    
-    <p>
-        <a class="btn btn-success" href="/login">Войти</a>
-    </p>
-    <p>
-        <a class="btn btn-primary " href="/register">Зарегистрироваться</a>
-    </p>
-    {{message}}
-    
 
-</form>
+<div class="container">
+  <h1 class="text-center mb-5">Подсчёт прыжков honkai star rail</h1>
+  <div class="row justify-content-center mb-3">
+    <div class="col-6">
+      <a href="/login" class="btn btn-success btn-block py-3">Войти</a>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col-6">
+      <a href="/register" class="btn btn-primary btn-block py-3">Зарегистрироваться</a>
+    </div>
+  </div>
+  {{message}}
+</div>
+
 {% endblock %}
+

@@ -79,9 +79,14 @@ async def get_jump_history(link, db_table, banner_num):
     count_all_jumps = list(map(int,[i for i in user.count_all_jumps.split(';')]))
     num_jump = db_sess.query(func.max(jump_tables[banner_num - 1].num_jump)).\
         filter(jump_tables[banner_num - 1].user_id == current_user.id).scalar() or 0
+    last_jump = db_sess.query(jump_tables[banner_num - 1]).first()
+    mark = False
     async with starrail.Jump(link = link,banner = banner_num,lang = "ru") as hist:
         async for key in hist.get_history():
             for item in key:
+                if item.time == last_jump.item_time:
+                    mark = True
+                    break
                 if not(db_sess.query(Item).filter(Item.id == item.id).first()):
                     new_item = Item()
                     new_item.id = item.id
@@ -95,6 +100,8 @@ async def get_jump_history(link, db_table, banner_num):
                                 item_time = item.time,
                                 num_jump = num_jump)
                 db_sess.add(jump)
+            if mark:
+                break
             count_all_jump += len(key)
     temp[banner_num - 1] = count_all_jumps[banner_num - 1] + count_all_jump
     user.count_all_jumps = conver_array_to_str(temp)
@@ -115,12 +122,12 @@ def count_garant(banner,db_sess):
         join(Item, banner.item_id == Item.id).\
         filter(Item.rank == 5).\
         filter(banner.user_id == current_user.id).\
-        order_by(banner.id.desc()).first()[0]
+        order_by(banner.id.asc()).first()[0]
     last_4 = db_sess.query(banner.num_jump).\
         join(Item, banner.item_id == Item.id).\
         filter(Item.rank == 4).\
-        filter(banner.user_id == current_user.id).first()[0]
-        #order_by(banner.id.desc()).first()[0]
+        filter(banner.user_id == current_user.id).\
+        order_by(banner.id.asc()).first()[0]
     return last_5 - 1, last_4 - 1
 
 '''
