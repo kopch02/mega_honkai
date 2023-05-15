@@ -55,7 +55,6 @@ def index():
         garant_5 = user.count_garant_5.split(';')
         garant_4 = user.count_garant_4.split(';')
         for i, jump_name in enumerate(JUMPS):
-
             table = Myclass()
             table.name = name_jumps_ru[i]
             table.count = all_jumps[i]
@@ -82,11 +81,17 @@ async def get_jump_history(link, db_table, banner_num):
     last_jump = db_sess.query(jump_tables[banner_num - 1]).first()
     mark = False
     async with starrail.Jump(link = link,banner = banner_num,lang = "ru") as hist:
-        async for key in hist.get_history():
-            for item in key:
-                if item.time == last_jump.item_time:
-                    mark = True
-                    break
+        history = [key async for key in hist.get_history()]
+        for i in range(len(history)-1, -1, -1):
+            key = history[i]
+            for item in reversed(key):
+                garant = -1
+                try:
+                    if item.time == last_jump.item_time:
+                        mark = True
+                        break
+                except AttributeError:
+                    pass
                 if not(db_sess.query(Item).filter(Item.id == item.id).first()):
                     new_item = Item()
                     new_item.id = item.id
@@ -95,10 +100,13 @@ async def get_jump_history(link, db_table, banner_num):
                     new_item.type = item.type
                     db_sess.add(new_item)
                 num_jump += 1
+                if item.rank == "3":
+                    garant = 1
                 jump = db_table(user_id = current_user.id, 
                                 item_id = item.id, 
                                 item_time = item.time,
-                                num_jump = num_jump)
+                                num_jump = num_jump,
+                                garant = garant)
                 db_sess.add(jump)
             if mark:
                 break
@@ -106,7 +114,8 @@ async def get_jump_history(link, db_table, banner_num):
     temp[banner_num - 1] = count_all_jumps[banner_num - 1] + count_all_jump
     user.count_all_jumps = conver_array_to_str(temp)
     db_sess.commit()
-    garant5[banner_num - 1],garant4[banner_num - 1] = count_garant(jump_tables[banner_num - 1], db_sess)
+    garant5[banner_num - 1] = count_garant(jump_tables[banner_num - 1], db_sess, 5)
+    garant4[banner_num - 1] = count_garant(jump_tables[banner_num - 1], db_sess, 4)
     user.count_garant_5 = conver_array_to_str(garant5)
     user.count_garant_4 = conver_array_to_str(garant4)
     db_sess.commit()
@@ -116,20 +125,59 @@ def conver_array_to_str(arr):
     return';'.join(list(map(str,arr)))
 
 
-def count_garant(banner,db_sess):
+def count_garant(banner,db_sess, rank):
     num_jump = db_sess.query(func.max(banner.num_jump)).filter(banner.user_id == current_user.id).scalar() or 0
-    last_5 = db_sess.query(banner.num_jump).\
+    last_jump  = db_sess.query(banner.num_jump).\
         join(Item, banner.item_id == Item.id).\
-        filter(Item.rank == 5).\
+        filter(Item.rank == rank).\
         filter(banner.user_id == current_user.id).\
-        order_by(banner.id.asc()).first()[0]
-    last_4 = db_sess.query(banner.num_jump).\
-        join(Item, banner.item_id == Item.id).\
-        filter(Item.rank == 4).\
-        filter(banner.user_id == current_user.id).\
-        order_by(banner.id.asc()).first()[0]
-    return last_5 - 1, last_4 - 1
+        order_by(banner.id.desc()).first()[0]
+    count_num_garant(banner, db_sess,rank)  
+    return num_jump - last_jump
 
+
+def count_num_garant(banner,db_sess, rank):
+    num_jump = db_sess.query(func.max(banner.num_jump)).\
+        filter(banner.user_id == current_user.id).scalar() or 0
+    
+    all_rank = get_list_all_not_garant(banner,db_sess, rank)
+
+    last_ = db_sess.query(banner).\
+        join(Item,banner.item_id == Item.id).\
+        filter(Item.rank == rank).\
+        filter(banner.garant != -1).\
+        filter(banner.user_id == current_user.id).\
+        order_by(banner.num_jump.desc()).first() or -1
+    if last_ == -1:
+        all_rank[0].garant = all_rank[0].num_jump
+        db_sess.commit()
+
+    all_rank = get_list_all_not_garant(banner,db_sess, rank)
+    
+    for jump in all_rank:
+        last_ = db_sess.query(banner).\
+                join(Item,banner.item_id == Item.id).\
+                filter(Item.rank == rank).\
+                filter(banner.garant != -1).\
+                filter(banner.user_id == current_user.id).\
+                order_by(banner.num_jump.desc()).first() or -1
+        jump.garant = jump.num_jump - last_.num_jump    
+
+        db_sess.commit()
+    
+
+
+def get_list_all_not_garant(banner, db_sess, rank):
+    all_ = db_sess.query(banner).\
+        join(Item,banner.item_id == Item.id).\
+        filter(Item.rank == rank).\
+        filter(banner.garant == -1).\
+        filter(banner.user_id == current_user.id).\
+        order_by(banner.id.asc()).all()
+    return all_
+
+#asc по возростанию
+#desc по убыванию
 '''
 select num_jump from jumps_event, items
 where items.rank = 5 and jumps_event.item_id = items.id

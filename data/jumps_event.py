@@ -17,8 +17,10 @@ class Jump_event(SqlAlchemyBase, UserMixin, SerializerMixin):
 
     num_jump = sqlalchemy.Column(sqlalchemy.Integer, default=0)
 
+    garant = sqlalchemy.Column(sqlalchemy.Integer)
+
     item = orm.relationship('Item')
     user = orm.relationship('User')
 
     def __repr__(self) -> str:
-        return f"<Jump> {self.id}, <user> {self.user.id}, <item> {self.item.id}"
+        return f"<Jump> {self.id}, <user> {self.user.id}, <item> {self.item.id} {self.item.name}"
