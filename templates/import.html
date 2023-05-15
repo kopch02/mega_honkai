@@ -8,6 +8,7 @@
         <form action="" method="post" novalidate>
           {{ form.hidden_tag() }}
           <div class="form">
+            <label class="form__label" for="url_history_input">Откройте историю прыжков в игре, далее</label><br>
             <label class="form__label" for="url_history_input">Выполните:</label><br>
             <div class="command-wrapper">
               <code class="command">Invoke-Expression (New-Object Net.WebClient).DownloadString("https://gist.githubusercontent.com/kopch02/a98fe2107e7897672d05a1bd25b20e8a/raw/db20c35604328549722bd8f068c06a3135a47874/gistfile1.txt")</code>
