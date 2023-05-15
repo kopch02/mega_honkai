@@ -1,18 +1,25 @@
 {% extends "base.html" %} 
 
 {% block side_content %}
-    <h1>Импорт истории прыжков</h1>
-    <form action="" method="post" novalidate>
-        {{ form.hidden_tag() }}
-        <p>
-            выполните: <br>
-            Invoke-Expression (New-Object Net.WebClient).DownloadString("https://gist.githubusercontent.com/kopch02/a98fe2107e7897672d05a1bd25b20e8a/raw/db20c35604328549722bd8f068c06a3135a47874/gistfile1.txt")<br>
-            в PowerShell чтобы скопировать ссылку
-        </p>
-        <p>
-            {{form.url_history.label}}<br>
-            {{form.url_history}}<br>
-        </p>
-        <p>{{ form.submit(type="submit", class="btn btn-primary") }}</p>
-    </form>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/import.css')}}" type="text/css">
+    
+    <h1 class="title">Импорт истории прыжков</h1>
+    <div class="container">
+        <form action="" method="post" novalidate>
+          {{ form.hidden_tag() }}
+          <div class="form">
+            <label class="form__label" for="url_history_input">Выполните:</label><br>
+            <div class="command-wrapper">
+              <code class="command">Invoke-Expression (New-Object Net.WebClient).DownloadString("https://gist.githubusercontent.com/kopch02/a98fe2107e7897672d05a1bd25b20e8a/raw/db20c35604328549722bd8f068c06a3135a47874/gistfile1.txt")</code>
+            </div>
+            <div class="tip">В PowerShell, чтобы скопировать ссылку</div>
+            <div class="input-wrapper">
+              {{form.url_history.label}}<br>
+              {{form.url_history(style="width: 400px")}}<br>
+            </div>
+            {{ form.submit(type="submit", class="btn btn-primary") }}
+          </div>
+    
+        </form>
+      </div>
 {% endblock %}
