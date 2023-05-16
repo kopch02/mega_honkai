@@ -17,7 +17,10 @@ ___
 ```Python
     conn_str = f"ваша_бд+модуль_для_работы://имя_пользователя_бд:пароль@localhost/название_бд"
 ```
-Далее вам остаётся только запустить файл main.py
+Далее вам остаётся только запустить файл [main.py](https://github.com/kopch02/mega_honkai/blob/master/main.py)
+>python main.py
+
+>python3.10 main.py
 ___
 Описание Базы Данных
 ===
