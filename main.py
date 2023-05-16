@@ -66,9 +66,10 @@ def index():
             filter(Item.rank == 5).all()
             tables.append(table)
         param['tables'] = tables
+        param['title'] = 'Главная'
         return render_template('index.html', **param)
     else:
-        return render_template('authorization.html')
+        return render_template('authorization.html',title = 'Авторизация')
 
 
 async def get_jump_history(link, db_table, banner_num):
@@ -198,7 +199,7 @@ def import_jump():
         for i in range(3):
             asyncio.run(get_jump_history(link,jump_tables[i], i+1))
         return redirect('/')
-    return render_template('import.html', form = form)
+    return render_template('import.html', form = form, title = 'Импорт')
 
 
 @application.route('/history', methods=['GET', 'POST'])
@@ -240,7 +241,7 @@ def register():
         db_sess.add(new_user)
         db_sess.commit()
         return redirect('/')
-    return render_template('register.html', form = form)
+    return render_template('register.html', form = form, title = 'Регистрация')
 
 
 @application.route('/login', methods=["GET","POST"])
@@ -260,6 +261,6 @@ def login():
                                    message="Не правильный пароль")
         login_user(user, remember=form.remember_me.data)
         return redirect('/')
-    return render_template("login.html", form = form)
+    return render_template("login.html", form = form, title = 'Вход')
 if __name__ == '__main__':
     main()
