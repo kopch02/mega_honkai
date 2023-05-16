@@ -54,15 +54,18 @@ def index():
         all_jumps = user.count_all_jumps.split(';')
         garant_5 = user.count_garant_5.split(';')
         garant_4 = user.count_garant_4.split(';')
-        for i, jump_name in enumerate(JUMPS):
+        for i, jump_name in enumerate(jump_tables):
             table = Myclass()
             table.name = name_jumps_ru[i]
             table.count = all_jumps[i]
             table.garant_5 = garant_5[i]
             table.garant_4 = garant_4[i]
+            table.all_5 = db_sess.query(jump_name).\
+            join(Item, jump_name.item_id == Item.id).\
+            filter(jump_name.user_id == current_user.id).\
+            filter(Item.rank == 5).all()
             tables.append(table)
         param['tables'] = tables
-        #count_garant()
         return render_template('index.html', **param)
     else:
         return render_template('authorization.html')
