@@ -78,18 +78,22 @@ async def get_jump_history(link, db_table, banner_num):
     count_all_jumps = list(map(int,[i for i in user.count_all_jumps.split(';')]))
     num_jump = db_sess.query(func.max(jump_tables[banner_num - 1].num_jump)).\
         filter(jump_tables[banner_num - 1].user_id == current_user.id).scalar() or 0
-    last_jump = db_sess.query(jump_tables[banner_num - 1]).first()
-    mark = False
+    try:
+        last_jump = db_sess.query(jump_tables[banner_num - 1]).\
+            filter(jump_tables[banner_num - 1].num_jump == num_jump).\
+            filter(jump_tables[banner_num - 1].user_id == current_user.id). first()
+    except IndexError:
+        last_jump = 0
     async with starrail.Jump(link = link,banner = banner_num,lang = "ru") as hist:
         history = [key async for key in hist.get_history()]
         for i in range(len(history)-1, -1, -1):
             key = history[i]
+            count_jump = 0
             for item in reversed(key):
                 garant = -1
                 try:
-                    if item.time == last_jump.item_time:
-                        mark = True
-                        break
+                    if item.time <= last_jump.item_time:
+                        continue
                 except AttributeError:
                     pass
                 if not(db_sess.query(Item).filter(Item.id == item.id).first()):
@@ -108,9 +112,8 @@ async def get_jump_history(link, db_table, banner_num):
                                 num_jump = num_jump,
                                 garant = garant)
                 db_sess.add(jump)
-            if mark:
-                break
-            count_all_jump += len(key)
+                count_jump += 1
+            count_all_jump += count_jump
     temp[banner_num - 1] = count_all_jumps[banner_num - 1] + count_all_jump
     user.count_all_jumps = conver_array_to_str(temp)
     db_sess.commit()
