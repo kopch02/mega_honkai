@@ -1,6 +1,6 @@
 Mega-Honkai
 ===
-Подсчёт прыжков и статистика по ним для игры Honkau Star Rail
+Подсчёт прыжков и статистика по ним для игры Honkai Star Rail
 ---
 ___
 Сайт работает по адресу [mega-honkai.ru](https://mega-honkai.ru/)
