@@ -1,5 +1,6 @@
 from flask import Flask, url_for, render_template, redirect, send_from_directory, abort, session, request, jsonify, make_response
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_restful import Api
 from data import db_session
 from sqlalchemy import func, select
 from data.users import User
@@ -12,6 +13,8 @@ from forms.user import RegisterForm, LoginForm
 from password_test import passworld_check, PasswordError
 import asyncio
 from honkaistarrail import starrail
+from api_users import UsersResource, UsersListResource
+from api_items import ItemsResource, ItemsListResource
 
 class Myclass():
     pass
@@ -27,6 +30,13 @@ application.config['MAX_COOKIE_SIZE'] = 1024 * 5
 login_manager = LoginManager()
 login_manager.init_app(application)
 db_session.global_init()
+api = Api(application)
+api.add_resource(UsersListResource, '/api/v1/users')
+api.add_resource(UsersResource,'/api/v1/users/<int:users_id>')
+api.add_resource(ItemsListResource, '/api/v1/items')
+api.add_resource(ItemsResource,'/api/v1/items/<int:item_id>')
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
